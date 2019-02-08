@@ -5,4 +5,4 @@
 
 3.Run bin/parking_lot parking_lot_file_inputs.txt to execute instructions from file.
 
-4.Run bin/parking_lot to execute commands from command line.
+4.Run bin/parking_lot to execute instructions from command line.
