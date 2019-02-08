@@ -22,7 +22,11 @@ func (model *parkingModel) Init(){
 
 func (model *parkingModel) Execute(instruction string){
 	command := commands.Parse(instruction)
-	if command.Executor == commands.CREATE.Command(){
+	if command.Executor == commands.CREATE.Get().Type{
+		if len(command.Parameters) != commands.CREATE.Get().ParamCount{
+			fmt.Println("make sure you have entered a valid command set")
+			return
+		}
 		err := model.dbConnector.CreateLot(command)
 		if err != nil{
 			fmt.Println("error occurred while creating parking lot,please try again")
@@ -31,7 +35,12 @@ func (model *parkingModel) Execute(instruction string){
 		}
 		return
 	}
-	if command.Executor == commands.PARK.Command(){
+
+	if command.Executor == commands.PARK.Get().Type{
+		if len(command.Parameters) != commands.PARK.Get().ParamCount{
+			fmt.Println("make sure you have entered a valid command set")
+			return
+		}
 		message , err := model.dbConnector.Park(command)
 		if err != nil{
 			if message != "" {
@@ -44,7 +53,12 @@ func (model *parkingModel) Execute(instruction string){
 		}
 		return
 	}
-	if command.Executor == commands.LEAVE.Command(){
+
+	if command.Executor == commands.LEAVE.Get().Type{
+		if len(command.Parameters) != commands.LEAVE.Get().ParamCount{
+			fmt.Println("make sure you have entered a valid command set")
+			return
+		}
 		message , err := model.dbConnector.Leave(command)
 		if err != nil{
 			if message != "" {
@@ -58,7 +72,11 @@ func (model *parkingModel) Execute(instruction string){
 		return
 	}
 
-	if command.Executor == commands.STATUS.Command(){
+	if command.Executor == commands.STATUS.Get().Type{
+		if len(command.Parameters) != commands.STATUS.Get().ParamCount{
+			fmt.Println("make sure you have entered a valid command set")
+			return
+		}
 		response , message, err := model.dbConnector.GetStatus(command)
 		if err != nil{
 			if message != "" {
@@ -75,7 +93,11 @@ func (model *parkingModel) Execute(instruction string){
 		return
 	}
 
-	if command.Executor == commands.NUMBERS_WITH_COLOR.Command(){
+	if command.Executor == commands.NUMBERS_WITH_COLOR.Get().Type{
+		if len(command.Parameters) != commands.NUMBERS_WITH_COLOR.Get().ParamCount{
+			fmt.Println("make sure you have entered a valid command set")
+			return
+		}
 		message , err := model.dbConnector.GetNumbersWithColor(command)
 		if err != nil{
 			if message != "" {
@@ -89,7 +111,11 @@ func (model *parkingModel) Execute(instruction string){
 		return
 	}
 
-	if command.Executor == commands.SLOT_WITH_NUMBER.Command(){
+	if command.Executor == commands.SLOT_WITH_NUMBER.Get().Type{
+		if len(command.Parameters) != commands.SLOT_WITH_NUMBER.Get().ParamCount{
+			fmt.Println("make sure you have entered a valid command set")
+			return
+		}
 		message , err := model.dbConnector.GetSlotWithNumber(command)
 		if err != nil{
 			if message != "" {
@@ -103,7 +129,11 @@ func (model *parkingModel) Execute(instruction string){
 		return
 	}
 
-	if command.Executor == commands.SLOTS_WITH_COLOR.Command(){
+	if command.Executor == commands.SLOTS_WITH_COLOR.Get().Type{
+		if len(command.Parameters) != commands.SLOTS_WITH_COLOR.Get().ParamCount{
+			fmt.Println("make sure you have entered a valid command set")
+			return
+		}
 		message , err := model.dbConnector.GetSlotsWithColor(command)
 		if err != nil{
 			if message != "" {

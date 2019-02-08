@@ -2,6 +2,11 @@ package commands
 
 import "strings"
 
+type command struct{
+	Type string
+	ParamCount int
+}
+
 type commandType string
 const (
 	CREATE             commandType = "create_parking_lot"
@@ -13,24 +18,24 @@ const (
 	SLOTS_WITH_COLOR   commandType = "slot_numbers_for_cars_with_colour"
 )
 
-func (enum commandType) Command() string {
+func (enum commandType) Get() *command {
 	switch enum {
 	case CREATE:
-		return "create_parking_lot"
+		return &command{"create_parking_lot",1}
 	case PARK:
-		return "park"
+		return &command{"park",2}
 	case LEAVE:
-		return "leave"
+		return &command{"leave", 1}
 	case STATUS:
-		return "status"
+		return &command{"status", 0}
 	case NUMBERS_WITH_COLOR:
-		return "registration_numbers_for_cars_with_colour"
+		return &command{"registration_numbers_for_cars_with_colour",1}
 	case SLOT_WITH_NUMBER:
-		return "slot_number_for_registration_number"
+		return &command{"slot_number_for_registration_number",1}
 	case SLOTS_WITH_COLOR:
-			return "slot_numbers_for_cars_with_colour"
+			return &command{"slot_numbers_for_cars_with_colour",1}
 	default:
-		return ""
+		return &command{}
 	}
 }
 
