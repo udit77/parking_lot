@@ -31,7 +31,7 @@ func createTable(db *sql.DB)error{
 
 func checkCarStatus(db *sql.DB, number string) (bool, error){
 	var count int
-	statement, err :=  db.Prepare("SELECT COUNT(*) AS COUNT FROM PARKING WHERE regregistration_number = ? AND STATUS = ?")
+	statement, err :=  db.Prepare("SELECT COUNT(*) AS COUNT FROM PARKING WHERE registration_number = ? AND STATUS = ?")
 	if err != nil {
 		return false, err
 	}

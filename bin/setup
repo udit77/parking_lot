@@ -54,4 +54,5 @@ else
     echo "Failed"
     exit 1
 fi
+echo "Running basic tests"
 bin/run_functional_tests

@@ -2,7 +2,6 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 cd $DIR/../src/commands
-ls -l
 go test -run TestParse
 cd $DIR/../src/config
 go test -run TestReadConfig
