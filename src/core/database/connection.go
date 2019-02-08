@@ -12,21 +12,9 @@ type DBConnector struct{
 	db *sql.DB
 	size int
 }
-var connector *DBConnector
-
-func init(){
-	initConnection()
-}
-
-func initConnection(){
-	connector = newDbConnection(config.Get().DataBase.DriverName, config.Get().DataBase.SourcePath)
-}
 
 func GetConnector() *DBConnector{
-	if connector.db == nil{
-		initConnection()
-	}
-	return connector
+	return newDbConnection(config.Get().DataBase.DriverName, config.Get().DataBase.SourcePath)
 }
 
 func newDbConnection(dbDriver string, dbSource string) *DBConnector{

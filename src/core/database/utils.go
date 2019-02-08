@@ -1,154 +1,164 @@
 package database
 
 import (
-	"github.com/parking_lot/src/commands"
-	"strconv"
-		"errors"
+	"database/sql"
 	"fmt"
 )
 
-type ParkingDbRowData struct{
-	Id int
-	Number string
-	Color string
-}
-
-func (connector *DBConnector) CreateLot(command *commands.CommandBuilder) error{
-	statement, err := connector.db.Prepare("DROP TABLE IF EXISTS PARKING")
+func dropTable(db *sql.DB) error{
+	statement, err := db.Prepare("DROP TABLE IF EXISTS PARKING")
 	if err != nil {
 		return err
 	}
 	_, err = statement.Exec()
-	if err != nil{
-		return err
-	}
-	statement, err = connector.db.Prepare("CREATE TABLE IF NOT EXISTS PARKING (id INTEGER PRIMARY KEY AUTOINCREMENT, registration_number VARCHAR(64), colour VARCHAR(64), status VARCHAR(64))")
-	if err != nil {
-		return err
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		return err
-	}
-	connector.size,err  = strconv.Atoi(command.Parameters[0])
 	if err != nil{
 		return err
 	}
 	return nil
 }
 
-func (connector *DBConnector) Park(command *commands.CommandBuilder) (string, error){
-	if connector.size == 0 {
-		return "parking lot is not initialized", errors.New("parking lot is not initialized")
-	}
-	var count int
-	statement, err := connector.db.Prepare("SELECT COUNT(*) AS COUNT FROM PARKING WHERE STATUS = ?")
+func createTable(db *sql.DB)error{
+	statement, err := db.Prepare("CREATE TABLE IF NOT EXISTS PARKING (id INTEGER PRIMARY KEY AUTOINCREMENT, registration_number VARCHAR(64), colour VARCHAR(64), status VARCHAR(64))")
 	if err != nil {
-		return "", err
+		return err
 	}
-	rows , err := statement.Query("OCCUPIED")
+	_, err = statement.Exec()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func checkCarStatus(db *sql.DB, number string) (bool, error){
+	var count int
+	statement, err :=  db.Prepare("SELECT COUNT(*) AS COUNT FROM PARKING WHERE regregistration_number = ? AND STATUS = ?")
+	if err != nil {
+		return false, err
+	}
+	rows , err := statement.Query(number,"OCCUPIED")
 	if err != nil{
-		return "", err
+		return false, err
 	}
 	for rows.Next(){
 		rows.Scan(&count)
 	}
-	if count == connector.size{ //Fully occupied
-		return "Sorry, parking lot is full", nil
-	}else{
-		var id int
-		statement, err := connector.db.Prepare("SELECT id FROM PARKING WHERE STATUS = ? ORDER BY id ASC LIMIT 1")
-		if err != nil {
-			return "", err
-		}
-		rows , err := statement.Query("VACANT")
-		if err != nil{
-			return "", err
-		}
-		for rows.Next(){
-			rows.Scan(&id)
-		}
-		if id == 0 {
-			statement, err = connector.db.Prepare("INSERT INTO PARKING (registration_number, colour, status) VALUES (?, ?, ?)")
-			if err != nil {
-				return "", err
-			}
-			_ , err := statement.Exec(command.Parameters[0], command.Parameters[1], "OCCUPIED")
-			if err != nil{
-				return "", err
-			}
-			return fmt.Sprintf("%v%v","Allocated slot number: ",count+1), nil
-		}else{
-			statement, err = connector.db.Prepare("UPDATE PARKING SET registration_number = ?, colour = ?, status = ? where id = ?")
-			if err != nil {
-				return "", err
-			}
-			_ , err := statement.Exec(command.Parameters[0], command.Parameters[1], "OCCUPIED", id)
-			if err != nil{
-				return "", err
-			}
-			return fmt.Sprintf("%v%v","Allocated slot number: ",id), nil
-		}
+	if count == 0{
+		return false, nil
 	}
+	return true, nil
 }
 
-func (connector *DBConnector) Leave(command *commands.CommandBuilder) (string,error){
-	if connector.size == 0 {
-		return "parking lot is not initialized", errors.New("parking lot is not initialized")
-	}
-	statement, err := connector.db.Prepare("UPDATE PARKING set status=? where id=?")
+
+func getOccupancy(db *sql.DB)(int, error){
+	var count int
+	statement, err := db.Prepare("SELECT COUNT(*) AS COUNT FROM PARKING WHERE STATUS = ?")
 	if err != nil {
-		return "", err
+		return count, err
 	}
-	_, err = statement.Exec("VACANT", command.Parameters[0])
-	if err != nil {
-		return "", err
+	rows , err := statement.Query("OCCUPIED")
+	if err != nil{
+		return count, err
 	}
-	return fmt.Sprintf("%v%v%v","Slot number ", command.Parameters[0], " is free"), nil
+	for rows.Next(){
+		rows.Scan(&count)
+	}
+	return count, nil
 }
 
-func (connector *DBConnector) GetStatus(command *commands.CommandBuilder)([]ParkingDbRowData, string, error){
+
+func getVacantSlot(db *sql.DB)(int,error){
+	var id int
+	statement, err := db.Prepare("SELECT id FROM PARKING WHERE STATUS = ? ORDER BY id ASC LIMIT 1")
+	if err != nil {
+		return id, err
+	}
+	rows , err := statement.Query("VACANT")
+	if err != nil{
+		return id, err
+	}
+	for rows.Next(){
+		rows.Scan(&id)
+	}
+	return id,nil
+}
+
+
+func park(db *sql.DB, number string, color string)error{
+	statement, err := db.Prepare("INSERT INTO PARKING (registration_number, colour, status) VALUES (?, ?, ?)")
+	if err != nil {
+		return err
+	}
+	_ , err = statement.Exec(number,color,"OCCUPIED")
+	if err != nil{
+		return err
+	}
+	return nil
+}
+
+
+func parkAtVacant(db *sql.DB, number string, color string, id int)error{
+	statement, err := db.Prepare("UPDATE PARKING SET registration_number = ?, colour = ?, status = ? where id = ?")
+	if err != nil {
+		return err
+	}
+	_ , err = statement.Exec(number, color, "OCCUPIED", id)
+	if err != nil{
+		return err
+	}
+	return nil
+}
+
+
+func vacant(db *sql.DB, id string)error{
+	statement, err := db.Prepare("UPDATE PARKING set status=? where id=?")
+	if err != nil {
+		return err
+	}
+	_, err = statement.Exec("VACANT", id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
+func getParkingStatus(db *sql.DB)([]ParkingDbRowData, error){
 	var (
 		id int
 		number string
 		colour string
 		status string
-	    result []ParkingDbRowData
+		result []ParkingDbRowData
 	)
-	if connector.size == 0 {
-		return []ParkingDbRowData{}, "parking lot is not initialized", errors.New("parking lot is not initialized")
-	}
-	statement, err := connector.db.Prepare("SELECT * FROM PARKING WHERE STATUS = ?")
+	statement, err := db.Prepare("SELECT * FROM PARKING WHERE STATUS = ?")
 	if err != nil {
-		return []ParkingDbRowData{}, "", err
+		return result, err
 	}
 	rows , err := statement.Query("OCCUPIED")
 	if err != nil {
-		return []ParkingDbRowData{}, "", err
+		return result, err
 	}
 	for rows.Next(){
 		_ = rows.Scan(&id, &number, &colour, &status)
 		result = append(result, ParkingDbRowData{id,number,colour})
 	}
-	return result, "", nil
+	return result,nil
 }
 
-func (connector *DBConnector) GetNumbersWithColor(command *commands.CommandBuilder) (string, error){
-	if connector.size == 0 {
-		return "parking lot is not initialized", errors.New("parking lot is not initialized")
-	}
+
+func getRegistrationForColour(db *sql.DB, colour string)(string,error){
 	var (
+		result string
 		number string
 	)
-	statement, err := connector.db.Prepare("SELECT registration_number FROM PARKING WHERE COLOUR = ? AND STATUS = ?")
+	statement, err := db.Prepare("SELECT registration_number FROM PARKING WHERE COLOUR = ? AND STATUS = ?")
 	if err != nil {
-		return "", err
+		return result, err
 	}
-	rows , err := statement.Query(command.Parameters[0],"OCCUPIED")
+	rows , err := statement.Query(colour,"OCCUPIED")
 	if err != nil {
-		return "", err
+		return result, err
 	}
-	result := ""
 	for rows.Next(){
 		_ = rows.Scan(&number)
 		if result == ""{
@@ -163,18 +173,14 @@ func (connector *DBConnector) GetNumbersWithColor(command *commands.CommandBuild
 	return result, nil
 }
 
-func (connector *DBConnector) GetSlotWithNumber(command *commands.CommandBuilder)(string,error){
-	if connector.size == 0 {
-		return "parking lot is not initialized", errors.New("parking lot is not initialized")
-	}
-	var (
-		slot int
-	)
-	statement, err := connector.db.Prepare("SELECT id FROM PARKING WHERE registration_number = ? AND STATUS = ?")
+
+func getSlotForNumber(db *sql.DB, registration string)(string, error){
+	var slot int
+	statement, err := db.Prepare("SELECT id FROM PARKING WHERE registration_number = ? AND STATUS = ?")
 	if err != nil {
 		return "",err
 	}
-	rows , err := statement.Query(command.Parameters[0],"OCCUPIED")
+	rows , err := statement.Query(registration,"OCCUPIED")
 	if err != nil {
 		return "",err
 	}
@@ -187,22 +193,20 @@ func (connector *DBConnector) GetSlotWithNumber(command *commands.CommandBuilder
 	return fmt.Sprintf("%v",slot), nil
 }
 
-func (connector *DBConnector) GetSlotsWithColor(command *commands.CommandBuilder)(string, error){
-	if connector.size == 0 {
-		return "parking lot is not initialized", errors.New("parking lot is not initialized")
-	}
+
+func getSlotsForColor(db *sql.DB, colour string)(string,error){
 	var (
 		slot int
+		result string
 	)
-	statement, err := connector.db.Prepare("SELECT id FROM PARKING WHERE colour = ? AND STATUS = ?")
+	statement, err := db.Prepare("SELECT id FROM PARKING WHERE colour = ? AND STATUS = ?")
 	if err != nil {
 		return "",err
 	}
-	rows , err := statement.Query(command.Parameters[0],"OCCUPIED")
+	rows , err := statement.Query(colour,"OCCUPIED")
 	if err != nil {
 		return "",err
 	}
-	result := ""
 	for rows.Next(){
 		_ = rows.Scan(&slot)
 		if result == ""{
