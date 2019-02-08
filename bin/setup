@@ -1,0 +1,57 @@
+# Add script to:
+# * Install dependencies
+# * Build/Compile
+# * Run Test Suit to validate
+#
+# After this is run, bin/parking_lot
+# should Just Work.
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+echo "Installing Dependencies..."
+echo "Fetching go dep..."
+go get github.com/golang/dep
+if [ $? -eq 0 ]; then
+    echo "Success"
+else
+    echo "Failed"
+fi
+cd $GOPATH/src/github.com/golang/dep
+echo "Installing Go dep..."
+go install ./...
+if [ $? -eq 0 ]; then
+    echo "Success"
+else
+    echo "Failed"
+    exit 1
+fi
+cd $DIR/..
+echo "Initializing dep..."
+FILE="Gopkg.lock"
+if [ -f $FILE ]; then
+  echo "Manifest file already exists. Skipping initialization"
+else
+  dep init
+  if [ $? -eq 0 ]; then
+    echo "Success"
+  else
+    echo "Failed"
+    exit 1
+  fi
+fi
+echo "Running dep ensure..."
+dep ensure -v
+if [ $? -eq 0 ]; then
+    echo "Success"
+else
+    echo "Failed"
+    exit 1
+fi
+echo "Building Project Parking lot"
+go build
+if [ $? -eq 0 ]; then
+    echo "Project successfully built"
+else
+    echo "Failed"
+    exit 1
+fi
+bin/run_functional_tests
