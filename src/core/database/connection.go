@@ -2,11 +2,11 @@ package database
 
 import (
 	"database/sql"
-	"github.com/parking_lot/src/constants"
 	"log"
 	_ "github.com/mattn/go-sqlite3/upgrade"
 	_ "github.com/mattn/go-sqlite3"
-	)
+	"github.com/parking_lot/src/config"
+)
 
 type DBConnector struct{
 	db *sql.DB
@@ -19,7 +19,7 @@ func init(){
 }
 
 func initConnection(){
-	connector = newDbConnection(constants.DbDriverName, constants.DbSourcePath)
+	connector = newDbConnection(config.Get().DataBase.DriverName, config.Get().DataBase.SourcePath)
 }
 
 func GetConnector() *DBConnector{

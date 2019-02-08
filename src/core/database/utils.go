@@ -7,16 +7,6 @@ import (
 	"fmt"
 )
 
-type QueryBuilder interface {
-	CreateLot()
-	Park()
-	Leave()
-	GetStatus()
-	GetNumbersWithColor()
-	GetSlotWithNumber()
-	GetSlotsWithColor()
-}
-
 type ParkingDbRowData struct{
 	Id int
 	Number string

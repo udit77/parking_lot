@@ -19,7 +19,6 @@ func (model *parkingModel) Init(){
 	model.dbConnector = database.GetConnector()
 }
 
-
 func (model *parkingModel) Execute(instruction string){
 	command := commands.Parse(instruction)
 	if command.Executor == commands.CREATE.Get().Type{

@@ -2,6 +2,6 @@ package constants
 
 
 const (
-	DbSourcePath = "parking.db"
-	DbDriverName = "sqlite3"
+	ConfigFilePath = "files/etc/parking_lot"
+	Module = "parking_lot"
 )

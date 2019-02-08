@@ -6,8 +6,13 @@ import (
 	"github.com/parking_lot/src/utility"
 	"path/filepath"
 	"os"
+	"github.com/parking_lot/src/config"
 )
 
+
+func init(){
+	config.Init()
+}
 
 func main() {
 	_, err := filepath.Abs(filepath.Dir(os.Args[0]))

@@ -6,8 +6,13 @@ type command struct{
 	Type string
 	ParamCount int
 }
+type CommandBuilder struct{
+	Executor string
+	Parameters []string
+}
 
 type commandType string
+
 const (
 	CREATE             commandType = "create_parking_lot"
 	PARK               commandType = "park"
@@ -37,11 +42,6 @@ func (enum commandType) Get() *command {
 	default:
 		return &command{}
 	}
-}
-
-type CommandBuilder struct{
-	Executor string
-	Parameters []string
 }
 
 func Parse(instruction string) *CommandBuilder{
