@@ -1,0 +1,4 @@
+/vendor
+bin/
+parking_lot
+*.db
