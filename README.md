@@ -1,4 +1,4 @@
-1.After unzipping, place this folder parking_lot in your GO path directory, with directory structure as $GOPATH/src/github.com/parking_lot.
+1.Clone this folder parking_lot in your GO path directory, with directory structure as $GOPATH/src/github.com/parking_lot.
 
 2.cd to $GOPATH/src/github.com/parking_lot and run 'bin/setup'.
    This will automatically install dependencies following which a 'vendor' folder will get created and perform a go build and then perform some functional checks.
